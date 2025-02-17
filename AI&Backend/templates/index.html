@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Jewelry Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+      :where([class^="ri-"])::before {
+        content: "\f3c2";
+      }
+      .material-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        z-index: 50;
+      }
+      .material-dropdown.active {
+        display: block;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366f1",
+              secondary: "#f59e0b",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-white min-h-screen">
+    <header
+      class="fixed w-full top-0 bg-white/90 backdrop-blur-sm z-50 border-b border-gray-100"
+    >
+      <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-12">
+            <a href="/" class="text-2xl font-['Pacifico'] text-primary">logo</a>
+            <nav class="hidden md:flex items-center gap-8">
+              <a
+                href="#"
+                class="text-gray-900 hover:text-primary transition-colors"
+                >Home</a
+              >
+              <a
+                href="#"
+                class="text-gray-900 hover:text-primary transition-colors"
+                >Design</a
+              >
+              <a
+                href="#"
+                class="text-gray-900 hover:text-primary transition-colors"
+                >Gallery</a
+              >
+              <a
+                href="#"
+                class="text-gray-900 hover:text-primary transition-colors"
+                >About</a
+              >
+            </nav>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4">
+              <button
+                id="openSigninModal"
+                class="text-gray-900 hover:text-primary transition-colors !rounded-button px-4 py-2"
+              >
+                Sign In
+              </button>
+              <button
+                id="openSignupModal"
+                class="bg-primary text-white hover:bg-primary/90 transition-colors !rounded-button px-4 py-2"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sign-In Modal -->
+    <div id="signinModal" class="fixed inset-0 bg-black/50 hidden z-50">
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg w-96"
+      >
+        <h2 class="text-2xl font-bold mb-6">Sign In</h2>
+        <form id="signinForm">
+          <div class="space-y-4">
+            <input
+              type="email"
+              id="signinEmail"
+              placeholder="Email"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+            <input
+              type="password"
+              id="signinPassword"
+              placeholder="Password"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+            <button
+              type="submit"
+              class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        </form>
+        <p class="mt-4 text-center text-gray-600">
+          Don't have an account?
+          <button id="switchToSignup" class="text-primary hover:underline">
+            Sign Up
+          </button>
+        </p>
+        <button
+          id="closeSigninModal"
+          class="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+        >
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign-Up Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black/50 hidden z-50">
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg w-96"
+      >
+        <h2 class="text-2xl font-bold mb-6">Sign Up</h2>
+        <form id="signupForm">
+          <div class="space-y-4">
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Full Name"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="Email"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Password"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+            <button
+              type="submit"
+              class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Sign Up
+            </button>
+          </div>
+        </form>
+        <p class="mt-4 text-center text-gray-600">
+          Already have an account?
+          <button id="switchToSignin" class="text-primary hover:underline">
+            Sign In
+          </button>
+        </p>
+        <button
+          id="closeSignupModal"
+          class="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+        >
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <main class="pt-20">
+      <section
+        class="relative min-h-[calc(100vh-5rem)] flex items-center overflow-hidden"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent z-10"
+        ></div>
+        <div class="container mx-auto px-6 relative z-20">
+          <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+              Design Your Dream Jewelry with AI
+            </h1>
+            <p class="text-xl text-gray-600 mb-8">
+              Transform your vision into reality with our AI-powered jewelry
+              design platform. Create unique, personalized pieces that tell your
+              story.
+            </p>
+            <button
+              class="bg-primary text-white hover:bg-primary/90 transition-colors !rounded-button px-8 py-4 text-lg font-medium"
+            >
+              Start Designing
+            </button>
+          </div>
+        </div>
+        <div class="absolute right-0 top-0 w-1/2 h-full">
+          <img
+            src="https://public.readdy.ai/ai/img_res/1ec93484206826c7ed186fa2ee87de95.jpg"
+            class="w-full h-full object-cover"
+            alt="Jewelry Collection"
+          />
+        </div>
+      </section>
+
+      <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
+            <div class="space-y-8">
+              <div class="space-y-4">
+                <h3 class="text-2xl font-semibold text-gray-900">
+                  Design Your Jewelry
+                </h3>
+                <div class="relative">
+                  <button
+                    id="materialBtn"
+                    class="w-full px-4 py-3 !rounded-button border border-gray-200 text-left flex items-center justify-between"
+                  >
+                    <span>Select Material</span>
+                    <i class="ri-arrow-down-s-line"></i>
+                  </button>
+                  <div id="materialDropdown" class="material-dropdown">
+                    <div class="p-2">
+                      <button
+                        class="w-full px-4 py-2 text-left hover:bg-gray-50 !rounded-button"
+                        data-material="gold"
+                      >
+                        Gold
+                      </button>
+                      <button
+                        class="w-full px-4 py-2 text-left hover:bg-gray-50 !rounded-button"
+                        data-material="silver"
+                      >
+                        Silver
+                      </button>
+                      <button
+                        class="w-full px-4 py-2 text-left hover:bg-gray-50 !rounded-button"
+                        data-material="platinum"
+                      >
+                        Platinum
+                      </button>
+                    </div>
+                  </div>
+                </div>
+               <div class="space-y-4">
+                 <input
+                   type="text"
+                   id="designPrompt"
+                   placeholder="Describe your dream jewelry..."
+                   class="w-full px-4 py-3 !rounded-button border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                 />
+                 <button
+                   id="generateDesign"
+                   class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                 >
+                   Generate Design
+                 </button>
+               </div>
+
+                </div>
+              </div>
+              <div
+                class="p-6 bg-white !rounded-button shadow-sm border border-gray-100"
+              >
+                <h4 class="text-lg font-medium text-gray-900 mb-4">
+                  AI Suggestions
+                </h4>
+                <div class="space-y-4">
+                  <div
+                    class="flex items-start gap-4 p-4 bg-gray-50 !rounded-button"
+                  >
+                    <i class="ri-lightbulb-line text-primary"></i>
+                    <div>
+                      <h5 class="font-medium text-gray-900">
+                        Material Optimization
+                      </h5>
+                      <p class="text-sm text-gray-600">
+                        Adjusting the design slightly could reduce material
+                        usage by 15% without compromising aesthetics.
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-start gap-4 p-4 bg-gray-50 !rounded-button"
+                  >
+                    <i class="ri-price-tag-3-line text-primary"></i>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Cost Saving</h5>
+                      <p class="text-sm text-gray-600">
+                        Consider using 18K gold instead of 24K for better
+                        durability and cost efficiency.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white !rounded-button shadow-sm border border-gray-100 p-6"
+            >
+               <div class="gap-3 grid grid-cols-1 lg:grid-cols-2">
+                     <div
+                     id="preview"
+                     class="h-[500px] bg-gray-50 !rounded-button"
+                   ></div>
+                      <div id="gallery" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 h-max"></div>
+               </div>
+              <div class="flex items-center justify-between mt-6">
+                <div class="text-lg font-medium text-gray-900">
+                  Estimated Price: <span class="text-primary">$1,299</span>
+                </div>
+                <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
+                  <button
+                    class="px-4 py-2 border border-gray-200 !rounded-button hover:border-primary hover:text-primary transition-colors"
+                  >
+                    Save Design
+                  </button>
+                  <button
+                    class="px-4 py-2 bg-primary text-white !rounded-button hover:bg-primary/90 transition-colors"
+                  >
+                    Proceed to Order
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-12">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <a href="/" class="text-2xl font-['Pacifico'] text-white mb-4 block"
+              >logo</a
+            >
+            <p class="text-gray-400">
+              Transform your jewelry ideas into reality with AI-powered design
+              tools.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-lg font-medium mb-4">Quick Links</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Design</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Gallery</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >About</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-medium mb-4">Support</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >FAQ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Contact</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Terms of Service</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Privacy Policy</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-medium mb-4">Connect</h4>
+            <div class="flex items-center gap-4">
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 !rounded-button hover:bg-gray-700 transition-colors"
+              >
+                <i class="ri-facebook-fill"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 !rounded-button hover:bg-gray-700 transition-colors"
+              >
+                <i class="ri-twitter-fill"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 !rounded-button hover:bg-gray-700 transition-colors"
+              >
+                <i class="ri-instagram-fill"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
