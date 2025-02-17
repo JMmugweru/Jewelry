@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const materialOptions = document.querySelectorAll("[data-material]");
   const generateButton = document.getElementById("generateDesign");
 
-  // Modal Handling
+
   document
     .getElementById("openSigninModal")
     .addEventListener("click", () => signinModal.classList.remove("hidden"));
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("closeSignupModal")
     .addEventListener("click", () => signupModal.classList.add("hidden"));
 
-  // Material Dropdown Logic
+
   materialBtn.addEventListener("click", () =>
     materialDropdown.classList.toggle("active")
   );
